@@ -10,7 +10,10 @@
  *  Future Expansion
  *  Impliment the token Pre (prefix). Add all supported advanced search supported tokens. Maybe also add client side sorting features to add additional
  *  Capabilities to the search. Add bookmarks search token. Figure out how to load search results without refreshing page.
+ 
+ *  Modified to work automatically as an Arc boost
  */
+
 
 //main search mod object
 const search = {
@@ -157,7 +160,7 @@ const search = {
     search.reset();
     search.injectCSS();
     //intialize dom containers
-    search.input().parentNode.innerHTML = "<span class='filter-wrapper'><span class='filter-container r-n6v787'></span><span class='filter-container-live r-n6v787'></span></span>" + $("[data-testid=SearchBox_Search_Input]").parentNode.innerHTML;
+    search.input().parentNode.innerHTML = "<span class='filter-wrapper'><span class='filter-container r-n6v787'></span><span class='filter-container-live r-n6v787'></span></span>" + document.querySelector("[data-testid=SearchBox_Search_Input]").parentNode.innerHTML;
     //add event listeners on input
     search.addListeners();
     search.input().dataset.tokens = "";
@@ -510,4 +513,16 @@ const search = {
     });
   },
 };
-search.init();
+
+// hacky solution to make it automatically load in an Arc boost
+const observer = new MutationObserver(mutations => {
+  mutations.forEach(mutation => {
+   const input = document.querySelector("[data-testid=SearchBox_Search_Input]")
+    if (!!input) {
+      search.init();
+      observer.disconnect();
+    }
+  });
+});
+
+observer.observe(document.getElementById('react-root'), { subtree: true, childList: true });
